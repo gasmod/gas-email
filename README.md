@@ -118,11 +118,6 @@ err := s.email.SendFromTemplate(ctx, &gas.TemplatedEmail{
 All three template fields are optional. If a template field is empty, the corresponding field on the
 embedded `Email` struct is used as-is.
 
-### Development mode
-
-When `GasEnv` is `development` or `testing`, the SES backend logs emails instead of sending them.
-This prevents accidental sends during local development.
-
 ## Config
 
 If `WithConfig` is not provided, the backend automatically binds configuration from the `gas.ConfigProvider` injected
@@ -130,13 +125,13 @@ via DI. This lets you drive email settings from environment variables or a confi
 
 ### SES config
 
-| Field                  | Default | Description                                                        |
-|------------------------|---------|--------------------------------------------------------------------|
-| `Email.Region`         |         | AWS region (required)                                              |
-| `Email.FromEmail`      |         | Default sender address (required)                                  |
-| `Email.Endpoint`       |         | Custom endpoint URL (e.g. LocalStack); empty = default AWS         |
-| `Email.AccessKeyID`    |         | Static AWS access key; empty = default credential chain            |
-| `Email.SecretAccessKey` |        | Static AWS secret key; empty = default credential chain            |
+| Field                   | Default | Description                                                |
+|-------------------------|---------|------------------------------------------------------------|
+| `Email.Region`          |         | AWS region (required)                                      |
+| `Email.FromEmail`       |         | Default sender address (required)                          |
+| `Email.Endpoint`        |         | Custom endpoint URL (e.g. LocalStack); empty = default AWS |
+| `Email.AccessKeyID`     |         | Static AWS access key; empty = default credential chain    |
+| `Email.SecretAccessKey` |         | Static AWS secret key; empty = default credential chain    |
 
 ## Sentinel Errors
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	htmltemplate "html/template"
 	"io"
-	"strings"
 	"sync/atomic"
 	texttemplate "text/template"
 
@@ -160,16 +159,6 @@ func (s *Service) Close() error {
 func (s *Service) Send(ctx context.Context, msg *gas.Email) error {
 	if s.closed.Load() {
 		return email.ErrClosed
-	}
-
-	if s.cfg.GasEnv.IsDevelopmentLike() {
-		s.logger.Info("Email message").
-			Str("to", strings.Join(msg.To, ", ")).
-			Str("subject", msg.Subject).
-			Str("html", msg.HTMLBody).
-			Str("text", msg.TextBody).
-			Send()
-		return nil
 	}
 
 	from := msg.From

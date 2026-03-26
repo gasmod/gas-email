@@ -123,9 +123,6 @@ from the DI container.
   then delegates to `Send`. Each template field (SubjectTemplate,
   HTMLTemplate, TextTemplate) is optional — if empty, the corresponding
   field on the embedded `Email` is used directly.
-- **Development mode:** When `GasEnv` is `development` or `testing`
-  (`IsDevelopmentLike()`), `Send` logs the email details instead of calling
-  SES. This prevents accidental sends during local development.
 - **Credential chain:** If both `AccessKeyID` and `SecretAccessKey` are set,
   static credentials are used. Otherwise, the default AWS credential chain
   is used (environment variables, shared config, IAM roles, etc.).

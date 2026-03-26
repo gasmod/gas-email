@@ -254,36 +254,6 @@ func TestSendWithCcBcc(t *testing.T) {
 	}
 }
 
-func TestSendDevModeSkipsSES(t *testing.T) {
-	t.Parallel()
-	called := false
-
-	mock := &mockSESClient{
-		sendEmailFn: func(_ context.Context, _ *awsses.SendEmailInput, _ ...func(*awsses.Options)) (*awsses.SendEmailOutput, error) {
-			called = true
-			return &awsses.SendEmailOutput{}, nil
-		},
-	}
-
-	cfg := validConfig()
-	cfg.GasEnv = "development"
-	ctor := New(WithConfig(cfg), WithClient(mock))
-	svc := ctor(&mockTemplateProvider{}, nil, gas.NewNopLogger()())
-	if err := svc.Init(); err != nil {
-		t.Fatalf("init: %v", err)
-	}
-	err := svc.Send(context.Background(), &gas.Email{
-		To:      []string{"recipient@example.com"},
-		Subject: "Test",
-	})
-	if err != nil {
-		t.Fatalf("Send() error = %v", err)
-	}
-	if called {
-		t.Error("SES client should not be called in development mode")
-	}
-}
-
 func TestSendClosed(t *testing.T) {
 	t.Parallel()
 	svc := newTestService(t, &mockSESClient{}, nil)
