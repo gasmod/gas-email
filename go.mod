@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.14
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.14
 	github.com/aws/aws-sdk-go-v2/service/ses v1.34.22
-	github.com/gasmod/gas v0.2.24
+	github.com/gasmod/gas v0.2.25
 	github.com/gasmod/gas-config v0.2.2
 	github.com/testcontainers/testcontainers-go v0.42.0
 )
