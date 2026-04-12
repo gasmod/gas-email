@@ -229,7 +229,7 @@ func (s *Service) SendFromTemplate(ctx context.Context, msg *gas.TemplatedEmail)
 	}
 
 	if msg.SubjectTemplate != "" {
-		rendered, err := s.renderText(msg.SubjectTemplate, msg.Data)
+		rendered, err := s.renderText(ctx, msg.SubjectTemplate, msg.Data)
 		if err != nil {
 			return fmt.Errorf("%s: render subject template %q: %w", s.Name(), msg.SubjectTemplate, err)
 		}
@@ -237,7 +237,7 @@ func (s *Service) SendFromTemplate(ctx context.Context, msg *gas.TemplatedEmail)
 	}
 
 	if msg.HTMLTemplate != "" {
-		rendered, err := s.renderHTML(msg.HTMLTemplate, msg.Data)
+		rendered, err := s.renderHTML(ctx, msg.HTMLTemplate, msg.Data)
 		if err != nil {
 			return fmt.Errorf("%s: render html template %q: %w", s.Name(), msg.HTMLTemplate, err)
 		}
@@ -245,7 +245,7 @@ func (s *Service) SendFromTemplate(ctx context.Context, msg *gas.TemplatedEmail)
 	}
 
 	if msg.TextTemplate != "" {
-		rendered, err := s.renderText(msg.TextTemplate, msg.Data)
+		rendered, err := s.renderText(ctx, msg.TextTemplate, msg.Data)
 		if err != nil {
 			return fmt.Errorf("%s: render text template %q: %w", s.Name(), msg.TextTemplate, err)
 		}
@@ -255,12 +255,12 @@ func (s *Service) SendFromTemplate(ctx context.Context, msg *gas.TemplatedEmail)
 	return s.Send(ctx, &msg.Email)
 }
 
-func (s *Service) renderHTML(name string, data any) (string, error) {
-	return s.render(renderHTML, name, data)
+func (s *Service) renderHTML(ctx context.Context, name string, data any) (string, error) {
+	return s.render(ctx, renderHTML, name, data)
 }
 
-func (s *Service) renderText(name string, data any) (string, error) {
-	return s.render(renderText, name, data)
+func (s *Service) renderText(ctx context.Context, name string, data any) (string, error) {
+	return s.render(ctx, renderText, name, data)
 }
 
 const (
@@ -272,8 +272,8 @@ type templateExecutor interface {
 	Execute(wr io.Writer, data any) error
 }
 
-func (s *Service) render(engine, name string, data any) (string, error) {
-	content, cErr := s.templates.Get(name)
+func (s *Service) render(ctx context.Context, engine, name string, data any) (string, error) {
+	content, cErr := s.templates.Get(ctx, name)
 	if cErr != nil {
 		return "", fmt.Errorf("get template %q: %w", name, cErr)
 	}

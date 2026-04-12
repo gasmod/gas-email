@@ -25,19 +25,19 @@ func (m *mockSESClient) SendEmail(ctx context.Context, params *awsses.SendEmailI
 // --- mock template provider ---
 
 type mockTemplateProvider struct {
-	getFn func(name string) ([]byte, error)
+	getFn func(ctx context.Context, name string) ([]byte, error)
 }
 
-func (m *mockTemplateProvider) Get(name string) ([]byte, error) {
+func (m *mockTemplateProvider) Get(ctx context.Context, name string) ([]byte, error) {
 	if m.getFn != nil {
-		return m.getFn(name)
+		return m.getFn(ctx, name)
 	}
 	return nil, errors.New("not found")
 }
 
-func (m *mockTemplateProvider) List() ([]string, error)     { return nil, nil }
-func (m *mockTemplateProvider) Register(_ string, _ []byte) {}
-func (m *mockTemplateProvider) RegisterFS(_ fs.FS) error    { return nil }
+func (m *mockTemplateProvider) List(_ context.Context) ([]string, error)             { return nil, nil }
+func (m *mockTemplateProvider) Register(_ context.Context, _ string, _ []byte) error { return nil }
+func (m *mockTemplateProvider) RegisterFS(_ context.Context, _ fs.FS) error          { return nil }
 
 // --- helpers ---
 
@@ -303,7 +303,7 @@ func TestSendFromTemplate(t *testing.T) {
 	}
 
 	tmpl := &mockTemplateProvider{
-		getFn: func(name string) ([]byte, error) {
+		getFn: func(_ context.Context, name string) ([]byte, error) {
 			switch name {
 			case "welcome-subject":
 				return []byte("Welcome, {{.Name}}!"), nil
@@ -361,7 +361,7 @@ func TestSendFromTemplatePartial(t *testing.T) {
 	}
 
 	tmpl := &mockTemplateProvider{
-		getFn: func(name string) ([]byte, error) {
+		getFn: func(_ context.Context, name string) ([]byte, error) {
 			if name == "body-html" {
 				return []byte("<p>Content</p>"), nil
 			}
@@ -419,7 +419,7 @@ func TestSendFromTemplateGetError(t *testing.T) {
 	t.Parallel()
 
 	tmpl := &mockTemplateProvider{
-		getFn: func(_ string) ([]byte, error) {
+		getFn: func(_ context.Context, _ string) ([]byte, error) {
 			return nil, errors.New("storage error")
 		},
 	}
@@ -445,7 +445,7 @@ func TestSendFromTemplateParseError(t *testing.T) {
 	t.Parallel()
 
 	tmpl := &mockTemplateProvider{
-		getFn: func(_ string) ([]byte, error) {
+		getFn: func(_ context.Context, _ string) ([]byte, error) {
 			return []byte("{{.Invalid template"), nil
 		},
 	}

@@ -20,22 +20,21 @@ import (
 
 // stubTemplateProvider is a minimal gas.TemplateProvider for e2e tests.
 type stubTemplateProvider struct {
-	getFn func(name string) ([]byte, error)
+	getFn func(_ context.Context, name string) ([]byte, error)
 }
 
-func (s *stubTemplateProvider) Get(name string) ([]byte, error) {
+func (s *stubTemplateProvider) Get(ctx context.Context, name string) ([]byte, error) {
 	if s.getFn != nil {
-		return s.getFn(name)
+		return s.getFn(ctx, name)
 	}
 	return nil, errors.New("not found")
 }
 
-func (s *stubTemplateProvider) List() ([]string, error)     { return nil, nil }
-func (s *stubTemplateProvider) Register(_ string, _ []byte) {}
-func (s *stubTemplateProvider) RegisterFS(_ fs.FS) error    { return nil }
+func (s *stubTemplateProvider) List(_ context.Context) ([]string, error)             { return nil, nil }
+func (s *stubTemplateProvider) Register(_ context.Context, _ string, _ []byte) error { return nil }
+func (s *stubTemplateProvider) RegisterFS(_ context.Context, _ fs.FS) error          { return nil }
 
 const sesLocalImage = "node:25.8.1-alpine3.23@sha256:5209bcaca9836eb3448b650396213dbe9d9a34d31840c2ae1f206cb2986a8543"
-
 
 // startSESContainer launches aws-ses-v2-local in a testcontainer and returns
 // the base URL (e.g. "http://localhost:<port>") along with a cleanup function.
@@ -122,10 +121,10 @@ func newE2EService(t *testing.T, endpoint string, tmpl gas.TemplateProvider) *se
 	}
 	cfg := &ses.Config{
 		Email: ses.Settings{
-			Region:         "us-east-1",
-			FromEmail:      "sender@example.com",
-			Endpoint:       endpoint,
-			AccessKeyID:    "test",
+			Region:          "us-east-1",
+			FromEmail:       "sender@example.com",
+			Endpoint:        endpoint,
+			AccessKeyID:     "test",
 			SecretAccessKey: "test",
 		},
 	}
@@ -252,7 +251,7 @@ func TestE2E_SendFromTemplate(t *testing.T) {
 	endpoint := startSESContainer(t)
 
 	tmpl := &stubTemplateProvider{
-		getFn: func(name string) ([]byte, error) {
+		getFn: func(_ context.Context, name string) ([]byte, error) {
 			switch name {
 			case "welcome-subject":
 				return []byte("Welcome, {{.Name}}!"), nil
