@@ -12,7 +12,6 @@ import (
 	"github.com/gasmod/gas"
 	email "github.com/gasmod/gas-email"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	awsses "github.com/aws/aws-sdk-go-v2/service/ses"
@@ -156,7 +155,7 @@ func (s *Service) createClient() error {
 	var sesOpts []func(*awsses.Options)
 	if s.cfg.Email.Endpoint != "" {
 		sesOpts = append(sesOpts, func(o *awsses.Options) {
-			o.BaseEndpoint = aws.String(s.cfg.Email.Endpoint)
+			o.BaseEndpoint = new(s.cfg.Email.Endpoint)
 		})
 	}
 
@@ -195,21 +194,21 @@ func (s *Service) Send(ctx context.Context, msg *gas.Email) error {
 		},
 		Message: &types.Message{
 			Subject: &types.Content{
-				Data:    aws.String(msg.Subject),
-				Charset: aws.String("UTF-8"),
+				Data:    new(msg.Subject),
+				Charset: new("UTF-8"),
 			},
 			Body: &types.Body{
 				Text: &types.Content{
-					Data:    aws.String(msg.TextBody),
-					Charset: aws.String("UTF-8"),
+					Data:    new(msg.TextBody),
+					Charset: new("UTF-8"),
 				},
 				Html: &types.Content{
-					Data:    aws.String(msg.HTMLBody),
-					Charset: aws.String("UTF-8"),
+					Data:    new(msg.HTMLBody),
+					Charset: new("UTF-8"),
 				},
 			},
 		},
-		Source:           aws.String(from),
+		Source:           new(from),
 		ReplyToAddresses: replyTo,
 	})
 	if err != nil {
