@@ -88,6 +88,22 @@ func New(opts ...Option) func(gas.TemplateProvider, gas.ConfigProvider, gas.Logg
 	}
 }
 
+// NewWithCustomProvider creates a new Service instance with a custom TemplateProvider and optional configurations.
+func NewWithCustomProvider[T gas.TemplateProvider](opts ...Option) func(T, gas.ConfigProvider, gas.Logger) *Service {
+	return func(templates T, cfgProvider gas.ConfigProvider, logger gas.Logger) *Service {
+		s := &Service{
+			cfg:         DefaultConfig(),
+			templates:   templates,
+			cfgProvider: cfgProvider,
+			logger:      logger.With().Str("service", serviceName).Logger(),
+		}
+		for _, opt := range opts {
+			opt(s)
+		}
+		return s
+	}
+}
+
 // Name returns the service identifier.
 func (s *Service) Name() string { return serviceName }
 

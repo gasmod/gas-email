@@ -97,6 +97,14 @@ func New(opts ...Option) func(gas.TemplateProvider, gas.ConfigProvider, gas.Logg
 func receives `gas.TemplateProvider`, `gas.ConfigProvider`, and `gas.Logger`
 from the DI container.
 
+```go
+func NewWithCustomProvider[T gas.TemplateProvider](opts ...Option) func(T, gas.ConfigProvider, gas.Logger) *Service
+```
+
+`NewWithCustomProvider` is a generic variant for cases where the DI container
+resolves a concrete type `T` that satisfies `gas.TemplateProvider` rather than
+the interface itself. Behaves identically to `New` otherwise.
+
 ### Options
 
 | Option                          | Description                                                      |

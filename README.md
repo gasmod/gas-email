@@ -59,6 +59,13 @@ With a pre-configured AWS client:
 emailses.New(emailses.WithClient(mySESClient))
 ```
 
+If your DI container resolves a concrete template provider type rather than
+the `gas.TemplateProvider` interface, use the generic variant:
+
+```go
+emailses.NewWithCustomProvider[*mytemplates.Service]()
+```
+
 ### Dependency injection
 
 Services receive the email sender through `gas.EmailProvider` via constructor injection:
