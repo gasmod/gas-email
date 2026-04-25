@@ -21,12 +21,14 @@ import (
 type MockEmail struct {
 	SendFn             func(ctx context.Context, msg *gas.Email) error
 	SendFromTemplateFn func(ctx context.Context, msg *gas.TemplatedEmail) error
+	CheckReadyFn       func(ctx context.Context) error
 	Calls              []Call
 
 	mu sync.Mutex
 }
 
 var _ gas.EmailProvider = (*MockEmail)(nil)
+var _ gas.ReadyReporter = (*MockEmail)(nil)
 
 // Call records a single method invocation on the mock.
 type Call struct {
@@ -54,6 +56,15 @@ func (m *MockEmail) SendFromTemplate(ctx context.Context, msg *gas.TemplatedEmai
 	m.record("SendFromTemplate", msg)
 	if m.SendFromTemplateFn != nil {
 		return m.SendFromTemplateFn(ctx, msg)
+	}
+	return nil
+}
+
+// CheckReady records the call and delegates to CheckReadyFn if set.
+func (m *MockEmail) CheckReady(ctx context.Context) error {
+	m.record("CheckReady")
+	if m.CheckReadyFn != nil {
+		return m.CheckReadyFn(ctx)
 	}
 	return nil
 }

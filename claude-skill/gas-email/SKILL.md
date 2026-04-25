@@ -6,7 +6,7 @@ description: >
   ecosystem. Use this skill when writing, reviewing, or debugging Go code that
   uses gas-email for sending emails via AWS SES, including templated emails
   with gas.TemplateProvider integration. Covers the ses sub-package, emailtest
-  mock, gas.EmailProvider implementation, sentinel errors, DI wiring,
+  mock, gas.EmailProvider and gas.ReadyReporter implementation, sentinel errors, DI wiring,
   configuration binding, development mode logging, static and default AWS
   credential chains, custom endpoint support for LocalStack, and template
   rendering with html/template and text/template. Make sure to use this skill
@@ -120,6 +120,17 @@ the interface itself. Behaves identically to `New` otherwise.
 | `Init`  | `() error`  | Validates config, creates AWS SES client              |
 | `Close` | `() error`  | Marks service as closed                               |
 
+### Readiness (gas.ReadyReporter)
+
+| Method       | Signature                       | Description                                                            |
+|--------------|---------------------------------|------------------------------------------------------------------------|
+| `CheckReady` | `(ctx context.Context) error`   | Returns `email.ErrClosed` after `Close`; `nil` otherwise               |
+
+The SES `Service` implements `gas.ReadyReporter` so a Kubernetes
+readinessProbe can depool the pod during shutdown/drain. It does not
+implement `gas.HealthReporter` — the SES client is stateless HTTP with no
+broken-state condition that a process restart would resolve.
+
 ### Behavior
 
 - **Send:** Calls SES `SendEmail`. Uses `msg.From` if set, otherwise falls
@@ -184,6 +195,7 @@ import "github.com/gasmod/gas-email/emailtest"
 type MockEmail struct {
     SendFn             func(ctx context.Context, msg *gas.Email) error
     SendFromTemplateFn func(ctx context.Context, msg *gas.TemplatedEmail) error
+    CheckReadyFn       func(ctx context.Context) error
     Calls              []Call
 }
 ```

@@ -467,6 +467,24 @@ func TestSendFromTemplateParseError(t *testing.T) {
 	}
 }
 
+// --- readiness tests ---
+
+func TestCheckReady(t *testing.T) {
+	t.Parallel()
+	svc := newTestService(t, &mockSESClient{}, nil)
+
+	if err := svc.CheckReady(context.Background()); err != nil {
+		t.Errorf("CheckReady() before close = %v, want nil", err)
+	}
+
+	_ = svc.Close()
+
+	err := svc.CheckReady(context.Background())
+	if !errors.Is(err, email.ErrClosed) {
+		t.Errorf("CheckReady() after close = %v, want ErrClosed", err)
+	}
+}
+
 // --- IsErrClosed test ---
 
 func TestIsErrClosed(t *testing.T) {

@@ -140,6 +140,15 @@ via DI. This lets you drive email settings from environment variables or a confi
 | `Email.AccessKeyID`     |         | Static AWS access key; empty = default credential chain    |
 | `Email.SecretAccessKey` |         | Static AWS secret key; empty = default credential chain    |
 
+## Readiness
+
+The SES `Service` implements `gas.ReadyReporter`. `CheckReady` returns
+`email.ErrClosed` once `Close` has been invoked (so a Kubernetes
+readinessProbe depools the pod during shutdown/drain) and `nil` otherwise.
+`HealthReporter` is intentionally not implemented — the SES client is
+stateless and has no broken-state condition that a process restart would
+resolve.
+
 ## Sentinel Errors
 
 The root `email` package defines sentinel errors used by all backends:

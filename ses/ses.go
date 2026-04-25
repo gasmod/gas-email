@@ -42,6 +42,7 @@ type Service struct {
 
 var _ gas.Service = (*Service)(nil)
 var _ gas.EmailProvider = (*Service)(nil)
+var _ gas.ReadyReporter = (*Service)(nil)
 
 // Client returns the underlying *ses.Client for advanced operations
 // beyond the EmailProvider interface. Returns nil if a custom sesClient
@@ -160,6 +161,16 @@ func (s *Service) createClient() error {
 	}
 
 	s.client = awsses.NewFromConfig(awsCfg, sesOpts...)
+	return nil
+}
+
+// CheckReady reports whether the service can accept Send calls. Returns
+// email.ErrClosed once Close has been invoked so probes depool the pod
+// during shutdown/drain.
+func (s *Service) CheckReady(_ context.Context) error {
+	if s.closed.Load() {
+		return email.ErrClosed
+	}
 	return nil
 }
 
